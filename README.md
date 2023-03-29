@@ -1,3 +1,3 @@
 # TestGitHubActions
 
-This PR makes another change.
+The purpose of this repository is to test GitHub Actions.
