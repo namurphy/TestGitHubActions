@@ -1,0 +1,33 @@
+name: Comment on Pull Request
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const message = "Hello! Here's a short code review checklist:\n\n- Have all variable names been chosen carefully and descriptively?\n- Are there any hardcoded values that could be replaced with variables or constants?\n- Are there any functions or methods that could be refactored to be more efficient or reusable?\n\nThanks for your hard work!";
+            const context = github.context;
+            const body = JSON.stringify({
+              body: message
+            });
+            const requestOptions = {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "User-Agent": "GitHub Actions"
+              },
+              body
+            };
+            const url = `https://api.github.com/repos/${context.repo.owner}/${context.repo.repo}/issues/${context.issue.number}/comments`;
+            const response = await fetch(url, {
+              ...requestOptions
+            });
+            console.log(response);
