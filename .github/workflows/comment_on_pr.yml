@@ -14,7 +14,10 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Thank you for contributing! ✨ PlasmaPy's future depends on contributors like you, so we deeply appreciate it! 🌱 The following checklist will help you and the reviewer through the code review process.
+	      # In body of message, use "\" immediately before backticks.
+              body: `Thank you for contributing! ✨ PlasmaPy's future depends on contributors like you, so we deeply appreciate it! 🌱 Please check out the [**contributor guide**](https://docs.plasmapy.org/en/latest/contributing/index.html) for more information on how to contribute.
+
+              The following checklist will help you and the reviewer through the code review process.
                - Overall
                  - [ ] Does the PR do what it intends to do?
                  - [ ] Except for very minor changes, is a changelog entry included and consistent with the [changelog guide](https://docs.plasmapy.org/en/latest/contributing/changelog_guide.html)?
