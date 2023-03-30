@@ -16,5 +16,5 @@ jobs:
               repo: context.repo.repo,
               body: `Thank you for contributing!
 
-                Please...`
+               - [ ] Item #1`
             })
