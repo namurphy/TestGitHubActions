@@ -1,4 +1,4 @@
-name: Add checklist
+name: add_checklist
 
 on:
   pull_request_target:
