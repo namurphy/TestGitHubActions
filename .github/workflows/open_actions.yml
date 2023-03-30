@@ -1,4 +1,4 @@
-name: "When Opened"
+name: open_actions
 
 on:
   issues:
