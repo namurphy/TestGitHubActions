@@ -6,7 +6,7 @@ on:
     - opened
 
 jobs:
-  triage:
+  triaging:
     runs-on: ubuntu-latest
     steps:
     - name: 'Reviewer checklist'
