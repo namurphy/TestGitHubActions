@@ -16,7 +16,6 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-	      # In body of message, use "\" immediately before backticks
               body: `Thank you for contributing! ✨ PlasmaPy's future depends on contributors like you, so we deeply appreciate it! 🌱 Please check out the [**contributor guide**](https://docs.plasmapy.org/en/latest/contributing/index.html) for more information on how to contribute.
 
               The following checklist will help you and the reviewer through the code review process.
