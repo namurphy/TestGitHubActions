@@ -18,8 +18,8 @@ jobs:
           fi
         shell: bash
       - name: Post comment on pull request
-        if: ${{ env.is_main_branch == 'true' }}
-        uses: actions/github-script@v5
+        if: env.IS_MAIN_BRANCH == 'true'
+        uses: actions/github-script@v6.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
