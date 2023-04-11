@@ -1,7 +1,7 @@
 name: Comment on main branch pull request
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: Check branch name
         id: check_branch
         run: |
-          if [ ${{ github.head_ref }} == 'main' ]; then
+          if [ "${{ github.event.pull_request.head.ref }}" == 'main' ]; then
             echo "Hello"
           fi
       - name: Post comment
@@ -25,7 +25,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.issues.createComment({
-              issue_number: context.issue.number,
+              issue_number: context.payload.pull_request.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: process.env.COMMENT
