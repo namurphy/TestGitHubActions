@@ -1,37 +1,33 @@
-name: Main Branch Check
+name: Check Pull Request Branch
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened]
 
 jobs:
-  main-branch-check:
+  check-branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if branch name is main
-        id: branch-check
-        run: |
-          if [ "${{ github.head_ref }}" == "main" ]; then
-            echo "IS_MAIN_BRANCH=true" >> $GITHUB_ENV
-          else
-            echo "IS_MAIN_BRANCH=false" >> $GITHUB_ENV
-          fi
-        shell: bash
-      - name: Post comment on pull request
-        if: env.IS_MAIN_BRANCH == 'true'
-        uses: actions/github-script@v6.3.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: pullRequest } = await github.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            });
-            const commentBody = `Thanks for your contribution! We generally prefer contributors not to submit pull requests from the main branch. Would you mind creating your pull request from a new branch? Thank you!`;
-            await github.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pullRequest.number,
-              body: commentBody,
-            });
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Check branch name
+      id: check-branch-name
+      run: |
+        if [ ${{ github.event.pull_request.head.ref }} == "main" ]; then
+          echo "Please do not create pull requests from the main branch of your fork. Create a new branch and make your changes there."
+          echo "::set-env name=COMMENT_BODY::$(echo Please do not create pull requests from the main branch of your fork. Create a new branch and make your changes there.)"
+        fi
+
+    - name: Comment on pull request
+      uses: actions/github-script@v6
+      if: env.COMMENT_BODY
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '${{ env.COMMENT_BODY }}'
+          })
