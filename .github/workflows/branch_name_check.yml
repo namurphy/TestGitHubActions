@@ -18,8 +18,8 @@ jobs:
           echo "false"
         fi
         shell: bash
-outputs:
-  is_main_branch: ${{ steps.branch-check.outputs.stdout }}
+      outputs:
+        is_main_branch: ${{ steps.branch-check.outputs.stdout }}
 
       - name: Post comment on pull request
         if: ${{ steps.branch-check.outputs.is_main_branch == 'true' }}
