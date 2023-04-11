@@ -1,0 +1,32 @@
+name: Comment on main branch pull request
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  comment_on_main_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Check branch name
+        id: check_branch
+        run: |
+          if [ ${{ github.head_ref }} == 'main' ]; then
+            echo "::set-env name=comment::Hello"
+          fi
+      - name: Post comment
+        uses: actions/github-script@v4
+        env:
+          COMMENT: ${{ steps.check_branch.outputs.comment }}
+        if: ${{ env.COMMENT }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: process.env.COMMENT
+            })
