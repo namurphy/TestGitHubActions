@@ -1,37 +1,41 @@
-name: Comment on main branch pull request
+name: Main Branch Check
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened, synchronize]
 
 jobs:
-  comment_on_main_branch:
+  main-branch-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Check branch name
-        id: check_branch
-        run: |
-          if [ "${{ github.event.pull_request.base.ref }}" == 'main' ]; then
-            COMMENT="Hello"
-          else
-            COMMENT=""
-          fi
-        env:
-          COMMENT: ${{ env.COMMENT }}
-      - name: Post comment
-        uses: actions/github-script@v4
-        env:
-          COMMENT: ${{ env.COMMENT }}
-        if: ${{ env.COMMENT }}
+
+    - name: Check if branch name is main
+      id: branch-check
+      run: |
+        if [ "${{ github.head_ref }}" == "main" ]; then
+          echo "true"
+        else
+          echo "false"
+        fi
+        shell: bash
+outputs:
+  is_main_branch: ${{ steps.branch-check.outputs.stdout }}
+
+      - name: Post comment on pull request
+        if: ${{ steps.branch-check.outputs.is_main_branch == 'true' }}
+        uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
-              issue_number: context.payload.pull_request.number,
+            const { data: pullRequest } = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: process.env.COMMENT
-            })
-
+              pull_number: context.payload.pull_request.number,
+            });
+            const commentBody = `Thanks for your contribution! We generally prefer contributors not to submit pull requests from the main branch. Would you mind creating your pull request from a new branch? Thank you!`;
+            await github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequest.number,
+              body: commentBody,
+            });
