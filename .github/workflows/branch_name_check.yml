@@ -14,12 +14,12 @@ jobs:
         id: check_branch
         run: |
           if [ ${{ github.head_ref }} == 'main' ]; then
-            echo "::set-env name=comment::Hello"
+            echo "Hello"
           fi
       - name: Post comment
         uses: actions/github-script@v4
         env:
-          COMMENT: ${{ steps.check_branch.outputs.comment }}
+          COMMENT: ${{ steps.check_branch.outputs.stdout }}
         if: ${{ env.COMMENT }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
