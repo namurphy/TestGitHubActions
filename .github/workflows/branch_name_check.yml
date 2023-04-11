@@ -12,9 +12,9 @@ jobs:
         id: branch-check
         run: |
           if [ "${{ github.head_ref }}" == "main" ]; then
-            echo "true" >> $GITHUB_ENV
+            echo "IS_MAIN_BRANCH=true" >> $GITHUB_ENV
           else
-            echo "false" >> $GITHUB_ENV
+            echo "IS_MAIN_BRANCH=false" >> $GITHUB_ENV
           fi
         shell: bash
       - name: Post comment on pull request
