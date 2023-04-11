@@ -1,7 +1,7 @@
 name: Comment on main branch pull request
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened]
 
 jobs:
@@ -13,13 +13,17 @@ jobs:
       - name: Check branch name
         id: check_branch
         run: |
-          if [ "${{ github.event.pull_request.head.ref }}" == 'main' ]; then
-            echo "Hello"
+          if [ "${{ github.event.pull_request.base.ref }}" == 'main' ]; then
+            COMMENT="Hello"
+          else
+            COMMENT=""
           fi
+        env:
+          COMMENT: ${{ env.COMMENT }}
       - name: Post comment
         uses: actions/github-script@v4
         env:
-          COMMENT: ${{ steps.check_branch.outputs.stdout }}
+          COMMENT: ${{ env.COMMENT }}
         if: ${{ env.COMMENT }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,3 +34,4 @@ jobs:
               repo: context.repo.repo,
               body: process.env.COMMENT
             })
+
