@@ -8,21 +8,17 @@ jobs:
   main-branch-check:
     runs-on: ubuntu-latest
     steps:
-
-    - name: Check if branch name is main
-      id: branch-check
-      run: |
-        if [ "${{ github.head_ref }}" == "main" ]; then
-          echo "true"
-        else
-          echo "false"
-        fi
+      - name: Check if branch name is main
+        id: branch-check
+        run: |
+          if [ "${{ github.head_ref }}" == "main" ]; then
+            echo "true" >> $GITHUB_ENV
+          else
+            echo "false" >> $GITHUB_ENV
+          fi
         shell: bash
-      outputs:
-        is_main_branch: ${{ steps.branch-check.outputs.stdout }}
-
       - name: Post comment on pull request
-        if: ${{ steps.branch-check.outputs.is_main_branch == 'true' }}
+        if: ${{ env.is_main_branch == 'true' }}
         uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
