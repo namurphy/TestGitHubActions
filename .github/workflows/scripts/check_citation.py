@@ -2,11 +2,14 @@ import os
 import sys
 import requests
 
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-PR_NUMBER = os.getenv("PR_NUMBER")
-REPO = os.getenv("GITHUB_REPOSITORY")
+try:
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+    PR_NUMBER = os.getenv("PR_NUMBER")
+    REPO = os.getenv("GITHUB_REPOSITORY")
+except Exception as exc:
+    raise RuntimeError("Unable to get environment variables")    
 
-EXCLUDED_USERS = ['dependabot', 'pre-commit-ci', 'sourcery-ai']
+EXCLUDED_USERS = ('dependabot', 'pre-commit-ci', 'sourcery-ai')
 
 def get_pr_authors():
     url = f"https://api.github.com/repos/{REPO}/pulls/{PR_NUMBER}/commits"
