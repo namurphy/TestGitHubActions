@@ -37,7 +37,7 @@ def main():
     if not check_passed:
         branch_name = os.getenv("GITHUB_HEAD_REF")
         primary_author = list(authors)[0]
-        message = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to [CITATION.cff](https://github.com/{GITHUB_REPOSITORY}/edit/{branch_name}/CITATION.cff). The entry should be of the form:\n```- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD>\n  alias: {failed_author}```All fields except `alias` are optional.\n\n[Sign up for ORCiD](https://orcid.org/register)"
+        message = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to [CITATION.cff](https://github.com/{REPO}/edit/{branch_name}/CITATION.cff). The entry should be of the form:\n```- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD>\n  alias: {failed_author}```All fields except `alias` are optional.\n\n[Sign up for ORCiD](https://orcid.org/register)"
         post_comment(message)
         print(message)
         sys.exit(1)
