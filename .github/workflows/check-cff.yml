@@ -1,11 +1,11 @@
-name: Authors included
+name: Check author list
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
-  check_author:
+  author-included:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -19,10 +19,10 @@ jobs:
     - name: Install dependencies
       run: pip install requests
 
-    - name: Check author in citation
+    - name: Check that author usernames are in CITATION.cff
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_HEAD_REF: ${{ github.head_ref }}
-      run: python .github/workflows/scripts/check_citation.py
+      run: python .github/scripts/check_citation.py
