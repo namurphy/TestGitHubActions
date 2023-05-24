@@ -38,10 +38,10 @@ def main():
         branch_name = os.getenv("GITHUB_HEAD_REF")
         primary_author = list(authors)[0]
 
-        comment = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to [CITATION.cff](https://github.com/{REPO}/edit/{branch_name}/CITATION.cff). The entry should be of the form:\n```- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD number>\n  alias: {failed_author}```\nAll fields except `alias` are optional.\n\n[Sign up for ORCiD](https://orcid.org/register)."
+        comment = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to [CITATION.cff](https://github.com/{REPO}/edit/{branch_name}/CITATION.cff). The entry should be of the form:\n\n```- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD ID number>\n  alias: {failed_author}\n```\n\nAll fields except `alias` are optional.\n\n[Sign up for ORCiD](https://orcid.org/register)."
         post_comment(comment)
 
-        message = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to CITATION.cff at https://github.com/{REPO}/edit/{branch_name}/CITATION.cff. The entry should be of the form:\n\n- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD number>\n  alias: <GitHub-username>```All fields except `alias` are optional.\n\nSign up for ORCiD: https://orcid.org/register"
+        message = f"\nTo ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to CITATION.cff at: https://github.com/{REPO}/edit/{branch_name}/CITATION.cff\n\nThe entry should be of the form:\n\n- given-names: <given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD number>\n  alias: <GitHub-username>\n\nAll fields except `alias` are optional.\n\nSign up for ORCiD: https://orcid.org/register\n"
         print(message)
         sys.exit(1)
 
