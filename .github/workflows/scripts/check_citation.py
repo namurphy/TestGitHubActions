@@ -2,14 +2,11 @@ import os
 import sys
 import requests
 
-try:
-    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-    PR_NUMBER = os.getenv("PR_NUMBER")
-    REPO = os.getenv("GITHUB_REPOSITORY")
-except Exception as exc:
-    raise RuntimeError("Unable to get environment variables")    
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+PR_NUMBER = os.getenv("PR_NUMBER")
+REPO = os.getenv("GITHUB_REPOSITORY") 
 
-EXCLUDED_USERS = ('dependabot', 'pre-commit-ci', 'sourcery-ai')
+EXCLUDED_USERS = ['dependabot', 'pre-commit-ci', 'sourcery-ai']
 
 def get_pr_authors():
     url = f"https://api.github.com/repos/{REPO}/pulls/{PR_NUMBER}/commits"
@@ -40,8 +37,11 @@ def main():
     if not check_passed:
         branch_name = os.getenv("GITHUB_HEAD_REF")
         primary_author = list(authors)[0]
-        message = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to [CITATION.cff](https://github.com/{REPO}/edit/{branch_name}/CITATION.cff). The entry should be of the form:\n```- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD>\n  alias: {failed_author}```All fields except `alias` are optional.\n\n[Sign up for ORCiD](https://orcid.org/register)"
-        post_comment(message)
+
+        comment = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to [CITATION.cff](https://github.com/{REPO}/edit/{branch_name}/CITATION.cff). The entry should be of the form:\n```- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD>\n  alias: {failed_author}```\nAll fields except `alias` are optional.\n\n[Sign up for ORCiD](https://orcid.org/register)."
+        post_comment(comment)
+
+        message = f"To ensure that you get credit for your contribution to PlasmaPy, please add yourself as an author to CITATION.cff at https://github.com/{REPO}/edit/{branch_name}/CITATION.cff. The entry should be of the form:\n\n- given-names: <add given names>\n  family-names: <family names>\n  affiliation: <affiliation>\n  orcid: https://orcid.org/<ORCiD>\n  alias: <GitHub-username>```All fields except `alias` are optional.\n\nSign up for ORCiD: https://orcid.org/register"
         print(message)
         sys.exit(1)
 
