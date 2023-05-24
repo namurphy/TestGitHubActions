@@ -25,4 +25,4 @@ jobs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_HEAD_REF: ${{ github.head_ref }}
-      run: python .github/scripts/check_citation.py
+      run: python .github/workflows/scripts/check_citation.py
