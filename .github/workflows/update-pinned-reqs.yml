@@ -38,8 +38,8 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git fetch origin main:main
-          git switch -C requirements-automatic-update main
+          git fetch origin
+          git switch -C requirements-automatic-update origin/main
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -72,4 +72,3 @@ jobs:
               body: 'This PR updates the pinned requirements based on the current state of the main branch.',
               labels: ['No changelog entry needed', 'dependencies'],
             });
-
