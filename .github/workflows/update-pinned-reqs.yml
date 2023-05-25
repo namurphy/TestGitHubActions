@@ -8,7 +8,7 @@ on:
 jobs:
   update_requirements:
     runs-on: ubuntu-latest
-    if: github.repository == 'namurphy/PlasmaPy'
+    if: github.repository == 'namurphy/TestGitHubActions'
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
