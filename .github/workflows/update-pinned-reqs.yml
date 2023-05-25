@@ -58,17 +58,18 @@ jobs:
           git commit -m "Update pinned requirements"
           git push -f origin requirements-automatic-update
 
-      - name: Create Pull Request
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pr = await github.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Update pinned requirements',
-              head: 'requirements-automatic-update', 
-              base: 'main',
-              body: 'This PR updates the pinned requirements based on the current state of the main branch.',
-              labels: ['No changelog entry needed', 'dependencies'],
-            });
+- name: Create Pull Request
+  uses: actions/github-script@v6
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    script: |
+      const octokit = github.getOctokit(github.context.token);
+      const pr = await octokit.rest.pulls.create({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        title: 'Update pinned requirements',
+        head: 'requirements-automatic-update', 
+        base: 'main',
+        body: 'This PR updates the pinned requirements based on the current state of the main branch.',
+        labels: ['No changelog entry needed', 'dependencies'],
+      });
