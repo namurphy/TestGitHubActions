@@ -13,28 +13,25 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Delete old branch
+      - name: Delete old branch if it exists
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const github = new (require("@actions/github")).getOctokit(githubToken);
-            const branch = 'requirements-automatic-update';
-            try {
-              await github.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: 'heads/' + branch
-              });
-            } catch (err) {
-              if (err.status != 404) throw err;
-            }
+            await github.git.deleteRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'heads/requirements-automatic-update'
+            }).catch((error) => { 
+              if (error.status != 404) throw error 
+            });
 
       - name: Create new branch
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git checkout -b requirements-automatic-update
+          git fetch origin main:main
+          git switch -C requirements-automatic-update main
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -51,15 +48,14 @@ jobs:
         run: |
           git add .
           git commit -m "Update pinned requirements"
-          git push origin requirements-automatic-update
+          git push -f origin requirements-automatic-update
 
       - name: Create Pull Request
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const octokit = github.getOctokit(githubToken);
-            const pr = await octokit.pulls.create({
+            const pr = await github.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: 'Update pinned requirements',
