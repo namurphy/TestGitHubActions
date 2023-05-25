@@ -2,7 +2,7 @@ name: Update pinned requirements
 
 on:
   schedule:
-  - cron: 0 1 * * 0     # This will run every Sunday at 1am UTC.
+    - cron: '0 1 * * 0' # This will run every Sunday at 1am UTC.
   workflow_dispatch:
 
 jobs:
@@ -10,57 +10,66 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'namurphy/TestGitHubActions'
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-    - name: Delete old branch if it exists
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          await github.rest.git.deleteRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: 'heads/requirements-automatic-update'
-          }).catch((error) => {
-            if (error.response.status != 404) throw error
-          });
+      - name: Delete old branch if it exists
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'heads/requirements-automatic-update'
+            }).then(({data}) => {
+              if(data.ref) {
+                return github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: 'heads/requirements-automatic-update'
+                });
+              }
+            }).catch((error) => {
+              console.log('No existing update branch');
+            });
 
-    - name: Create new branch
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git fetch origin main:main
-        git switch -C requirements-automatic-update main
+      - name: Create new branch
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git fetch origin main:main
+          git switch -C requirements-automatic-update main
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install pip-tools
-      run: python -m pip install pip-tools
+      - name: Install pip-tools
+        run: python -m pip install pip-tools
 
-    - name: Generate requirements.txt
-      run: pip-compile --all-extras --output-file=requirements.txt --resolver=backtracking -r -U
+      - name: Generate requirements.txt
+        run: pip-compile --all-extras --output-file=requirements.txt --resolver=backtracking -r -U
 
-    - name: Commit and push changes
-      run: |
-        git add .
-        git commit -m "Update pinned requirements"
-        git push -f origin requirements-automatic-update
+      - name: Commit and push changes
+        run: |
+          git add .
+          git commit -m "Update pinned requirements"
+          git push -f origin requirements-automatic-update
 
-    - name: Create Pull Request
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const pr = await github.pulls.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: 'Update pinned requirements',
-            head: 'requirements-automatic-update',
-            base: 'main',
-            body: 'This PR updates the pinned requirements based on the current state of the main branch.',
-            labels: ['No changelog entry needed', 'dependencies'],
-          });
+      - name: Create Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Update pinned requirements',
+              head: 'requirements-automatic-update', 
+              base: 'main',
+              body: 'This PR updates the pinned requirements based on the current state of the main branch.',
+              labels: ['No changelog entry needed', 'dependencies'],
+            });
+
