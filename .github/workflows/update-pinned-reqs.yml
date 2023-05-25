@@ -1,25 +1,15 @@
-name: Update pinned requirements
+name: Update Requirements
 
 on:
-  schedule:
-    - cron: '0 1 * * 0' # This will run every Sunday at 1am UTC.
   workflow_dispatch:
 
 jobs:
-  update_requirements:
+  update-requirements:
     runs-on: ubuntu-latest
-    if: github.repository == 'namurphy/TestGitHubActions'
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
 
-      - name: Reset or create the branch
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git fetch origin main:main
-          git branch -D requirements-automatic-update || true
-          git switch -C requirements-automatic-update main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -29,26 +19,28 @@ jobs:
       - name: Install pip-tools
         run: python -m pip install pip-tools
 
+      - name: Configure Git user
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Delete and recreate branch
+        run: |
+          git branch -D update-requirements || true
+          git checkout -b update-requirements
+
       - name: Generate requirements.txt
         run: pip-compile --all-extras --output-file=requirements.txt --resolver=backtracking -r -U
 
-      - name: Commit changes
+      - name: Commit and push
         run: |
-          git add .
-          git commit -m "Update pinned requirements" || true
-
-      - name: Push changes
-        run: |
-          git push -f origin requirements-automatic-update
+          git add requirements.txt
+          git commit -m "Update requirements.txt"
+          git push --force --set-upstream origin update-requirements
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'Update pinned requirements'
-          body: 'This PR updates the pinned requirements based on the current state of the main branch.'
-          base: 'main'
-          head: 'requirements-automatic-update'
-          labels: 'No changelog entry needed,dependencies'
-          commit-message: 'Update pinned requirements'
-          delete-branch: 'true'
+          title: Update pinned requirements
+          body: This PR updates the pinned requirements based on the current state of the main branch.
+          labels: No changelog entry needed, dependencies
