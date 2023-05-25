@@ -58,8 +58,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const github = new (require("@actions/github")).getOctokit(githubToken);
-            const pr = await github.pulls.create({
+            const octokit = github.getOctokit(githubToken);
+            const pr = await octokit.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: 'Update pinned requirements',
@@ -68,4 +68,3 @@ jobs:
               body: 'This PR updates the pinned requirements based on the current state of the main branch.',
               labels: ['No changelog entry needed', 'dependencies'],
             });
-
