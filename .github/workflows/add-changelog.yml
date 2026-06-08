@@ -16,77 +16,77 @@ jobs:
       pull-requests: read
 
     steps:
-      - name: Check user permissions
-        id: check_permission
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.event.comment.user.login }}
-        run: |
-          # Fetch the user's permission level in this repository
-          PERM=$(gh api repos/${{ github.repository }}/collaborators/$USERNAME/permission --jq '.permission')
-          
-          echo "User $USERNAME has '$PERM' permission."
-          
-          # Allow only admin or write permissions, reject read or none
-          if [[ "$PERM" != "admin" && "$PERM" != "write" ]]; then
-            echo "::error::User $USERNAME does not have write permissions to run this command."
-            exit 1
-          fi
+    - name: Check user permissions
+      id: check_permission
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        USERNAME: ${{ github.event.comment.user.login }}
+      run: |
+        # Fetch the user's permission level in this repository
+        PERM=$(gh api repos/${{ github.repository }}/collaborators/$USERNAME/permission --jq '.permission')
 
-      - name: Check out repository
-        uses: actions/checkout@v4
+        echo "User $USERNAME has '$PERM' permission."
 
-      - name: Parse Comment and Fetch PR Details
-        id: pr_data
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMENT_BODY: ${{ github.event.comment.body }}
-          PR_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          # Extract the type from the comment (second word)
-          TYPE=$(echo "$COMMENT_BODY" | awk '{print $2}')
-          
-          # Validate the type against your allowed list
-          if [[ ! "$TYPE" =~ ^(doc|feature|internal|test|removal|breaking|misc)$ ]]; then
-            echo "::error::Invalid changelog type '$TYPE'. Must be one of: doc, feature, internal, test, removal, breaking, misc."
-            exit 1
-          fi
-          
-          # Fetch the PR title using the GitHub CLI
-          PR_TITLE=$(gh pr view "$PR_NUMBER" --json title --jq '.title')
-          
-          # Ensure the title ends with a single period
-          # Strip any trailing periods first, then add exactly one
-          PR_TITLE_CLEANED="${PR_TITLE%%.*}."
-          
-          # Export variables for subsequent steps
-          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
-          echo "title=$PR_TITLE_CLEANED" >> "$GITHUB_OUTPUT"
+        # Allow only admin or write permissions, reject read or none
+        if [[ "$PERM" != "admin" && "$PERM" != "write" ]]; then
+          echo "::error::User $USERNAME does not have write permissions to run this command."
+          exit 1
+        fi
 
-      - name: Checkout PR Branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          # Check out the actual head branch of the PR so we can commit directly to it
-          gh pr checkout "$PR_NUMBER"
+    - name: Check out repository
+      uses: actions/checkout@v4
 
-      - name: Create Changelog File
-        run: |
-          mkdir -p changelog
-          FILE_PATH="changelog/${{ github.event.issue.number }}.${{ steps.pr_data.outputs.type }}.rst"
-          
-          # Write the cleaned PR title to the file
-          echo "${{ steps.pr_data.outputs.title }}" > "$FILE_PATH"
-          
-          echo "Created file at $FILE_PATH"
+    - name: Parse Comment and Fetch PR Details
+      id: pr_data
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COMMENT_BODY: ${{ github.event.comment.body }}
+        PR_NUMBER: ${{ github.event.issue.number }}
+      run: |
+        # Extract the type from the comment (second word)
+        TYPE=$(echo "$COMMENT_BODY" | awk '{print $2}')
 
-      - name: Commit and Push Changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          FILE_PATH="changelog/${{ github.event.issue.number }}.${{ steps.pr_data.outputs.type }}.rst"
-          git add "$FILE_PATH"
-          git commit -m "chore: add changelog entry for PR #${{ github.event.issue.number }}"
-          git push origin HEAD
+        # Validate the type against your allowed list
+        if [[ ! "$TYPE" =~ ^(doc|feature|internal|test|removal|breaking|misc)$ ]]; then
+          echo "::error::Invalid changelog type '$TYPE'. Must be one of: doc, feature, internal, test, removal, breaking, misc."
+          exit 1
+        fi
+
+        # Fetch the PR title using the GitHub CLI
+        PR_TITLE=$(gh pr view "$PR_NUMBER" --json title --jq '.title')
+
+        # Ensure the title ends with a single period
+        # Strip any trailing periods first, then add exactly one
+        PR_TITLE_CLEANED="${PR_TITLE%%.*}."
+
+        # Export variables for subsequent steps
+        echo "type=$TYPE" >> "$GITHUB_OUTPUT"
+        echo "title=$PR_TITLE_CLEANED" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout PR Branch
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ github.event.issue.number }}
+      run: |
+        # Check out the actual head branch of the PR so we can commit directly to it
+        gh pr checkout "$PR_NUMBER"
+
+    - name: Create Changelog File
+      run: |
+        mkdir -p changelog
+        FILE_PATH="changelog/${{ github.event.issue.number }}.${{ steps.pr_data.outputs.type }}.rst"
+
+        # Write the cleaned PR title to the file
+        echo "${{ steps.pr_data.outputs.title }}" > "$FILE_PATH"
+
+        echo "Created file at $FILE_PATH"
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        FILE_PATH="changelog/${{ github.event.issue.number }}.${{ steps.pr_data.outputs.type }}.rst"
+        git add "$FILE_PATH"
+        git commit -m "chore: add changelog entry for PR #${{ github.event.issue.number }}"
+        git push origin HEAD
